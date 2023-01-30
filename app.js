@@ -1,6 +1,15 @@
 const express = require('express');
 const app = express();
 
+const crypto = require('crypto');
+const secret = crypto.randomBytes(64).toString('hex');
+console.log(secret);
+
+const session = require("express-session");
+app.use(session({
+    secret: "ef26ea49688b4db326a7cedc0076ac9ebe6242d387299db702f9a393aef083fc3f57b5c2cfea1bfa41861338c5e693c9e1024f6cce70b b3093c25befd2ff49dd"
+}));
+
 const Sequelize = require('sequelize');
 const sequelize = new Sequelize('review book', 'root', 'root_toor', {
     host: 'localhost',
@@ -60,12 +69,15 @@ app.use(passport.session());
 
 
 
-app.get('/login', (req, res) => {
-    res.render('login.html');
+app.get('/', function(req, res) {
+    res.sendFile(__dirname + '/views/templates/layout.html');
+});
+app.get('/login', function(req, res) {
+    res.sendFile(__dirname + '/views/templates/login.html');
 });
 
 app.get('/register', (req, res) => {
-    res.render('register.html');
+    res.render('/views/templates/register.html');
 });
 
 app.listen(3000, () => {
