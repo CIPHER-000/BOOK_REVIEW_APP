@@ -61,11 +61,11 @@ app.use(passport.session());
 
 
 app.get('/login', (req, res) => {
-    res.send('Login page');
+    res.send('login.html');
 });
 
 app.get('/register', (req, res) => {
-    res.send('Register page');
+    res.send('register.html');
 });
 
 app.listen(3000, () => {
