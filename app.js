@@ -1,56 +1,57 @@
 const express = require('express');
 const app = express();
-const path = require('path');
+const mysql = require('mysql2');
+const bodyParser = require('body-parser');
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
 
-const crypto = require('crypto');
-const secret = crypto.randomBytes(64).toString('hex');
-console.log(secret);
+var flash = require('connect-flash');
+app.use(flash());
+
+app.use(express.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({ extended: true }));
+
+const con = mysql.createConnection({
+    host: "localhost",
+    user: "root",
+    password: "root_toor",
+    database: "review book"
+});
+
+con.connect(function(err) {
+    if (err) throw err;
+    console.log("Connected to MySQL");
+});
+
+const secret = require('crypto').randomBytes(64).toString('hex');
+console.log("secret:", secret);
 
 const session = require("express-session");
 app.use(session({
-    secret: "ef26ea49688b4db326a7cedc0076ac9ebe6242d387299db702f9a393aef083fc3f57b5c2cfea1bfa41861338c5e693c9e1024f6cce70bb3093c25befd2ff49dd"
+    secret,
+    resave: false,
+    saveUninitialized: false
 }));
-
-const Sequelize = require('sequelize');
-const sequelize = new Sequelize('review book', 'root', 'root_toor', {
-    host: 'localhost',
-    dialect: 'mysql'
-});
-
-
-
-sequelize
-    .authenticate()
-    .then(() => {
-        console.log('Connection has been established successfully.');
-    })
-    .catch(err => {
-        console.error('Unable to connect to the database:', err);
-    });
-
-const User = sequelize.define('user', {
-    username: {
-        type: Sequelize.STRING
-    },
-    password: {
-        type: Sequelize.STRING
-    }
-});
-
 
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 
 passport.use(new LocalStrategy(
     function(username, password, done) {
-        User.findOne({ where: { username: username } }).then(user => {
-            if (!user) {
+        const checkUser = 'SELECT * FROM user WHERE username = ?';
+        con.query(checkUser, [username], function(err, results) {
+            if (err) return done(err);
+            if (!results.length) {
                 return done(null, false, { message: 'Incorrect username' });
             }
-            if (user.password !== password) {
-                return done(null, false, { message: 'Incorrect password' });
-            }
-            return done(null, user);
+            const hashedPassword = results[0].password;
+            bcrypt.compare(password, hashedPassword, function(err, isMatch) {
+                if (err) return done(err);
+                if (!isMatch) {
+                    return done(null, false, { message: 'Incorrect password' });
+                }
+                return done(null, results[0]);
+            });
         });
     }
 ));
@@ -60,8 +61,10 @@ passport.serializeUser(function(user, done) {
 });
 
 passport.deserializeUser(function(id, done) {
-    User.findByPk(id).then(user => {
-        done(null, user);
+    const sql = 'SELECT * FROM user WHERE id = ?';
+    con.query(sql, [id], function(err, results) {
+        if (err) return done(err);
+        done(null, results[0]);
     });
 });
 
@@ -75,25 +78,60 @@ app.get('/', function(req, res) {
     res.sendFile(__dirname + '/views/templates/layout.html');
 });
 
+app.get('/homepage', function(req, res) {
+    if (!req.session.user) {
+        return res.redirect('/');
+    }
+    res.sendFile(__dirname + '/views/templates/homepage.html');
+});
+
 app.get('/static/styles.css', function(req, res) {
     res.set('Content-Type', 'text/css');
     res.sendFile(__dirname + '/views/static/styles.css');
 });
 
 
-app.get("/", (req, res) => {
-    res.sendFile(__dirname + "/views/templates/layout.html");
+app.post('/', passport.authenticate('local', {
+    successRedirect: '/homepage',
+    failureRedirect: '/',
+    failureFlash: true
+}));
+
+app.post('/', (req, res) => {
+    const sql = 'INSERT INTO user (username, email, password) VALUES (?, ?, ?)';
+    const username = req.body.username;
+    const email = req.body.email;
+    const password = req.body.password;
+    const username1 = req.body.username1;
+    const password1 = req.body.password1;
+
+    bcrypt.hash(password1, saltRounds, function(err, hash) {
+        con.query('INSERT INTO user (username, email, password) VALUES (?, ?, ?)', [username1, email, hash], function(err, result) {
+            if (err) throw err;
+            console.log('Form inputs inserted into database');
+            console.log("Hash:", hash)
+            res.redirect('/homepage');
+        });
+    });
 });
 
-
-app.get('/login', function(req, res) {
-    res.sendFile(__dirname + '/views/login.html');
-});
-
-app.get('/register', (req, res) => {
-    res.render('/views/register.html');
-});
 
 app.listen(3000, () => {
     console.log('App listening on port 3000');
 });
+
+
+
+
+
+//The code is an Express.js application that creates an API
+//for a review book website.It uses the following libraries: express, mysql2, body - parser, crypto, bcrypt, connect - flash, express - session, sequelize, passport, passport - local.
+
+//The app connects to a MySQL database with the connection details host: 'localhost', user: 'root', password: 'root_toor', database: 'review book'.
+
+//The authentication is done using passport and the LocalStrategy strategy.The user inputs are checked against the stored user information in the database.The password is hashed using bcrypt.
+
+//The code serves HTML pages and CSS files to the client.The user can either log in or sign up by submitting a form in the '/'
+//endpoint.If the authentication is successful, the user is redirected to the homepage, otherwise the user is redirected back to the login page with a failure flash message.
+
+//When a user signs up, the form inputs are inserted into the MySQL database using an SQL query.The password is hashed and stored in the database.
