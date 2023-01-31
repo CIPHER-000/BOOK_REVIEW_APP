@@ -118,7 +118,7 @@ app.post('/signup', [
             if (err) throw err;
             console.log('Form inputs inserted into database');
             console.log("Hash:", hash)
-            res.redirect('/');
+            res.redirect('/homepage');
         });
     });
 });
@@ -128,7 +128,7 @@ app.post('/signin', function(req, res, next) {
     let password = req.body.password;
 
     let sql = "SELECT * FROM user WHERE email = ? AND password = ?";
-    con.query(sql, [email, password], (err, result) => {
+    let result = con.query(sql, [email, password], (err, result) => {
         if (err) {
             req.flash('error', 'Something went wrong. Please try again later.');
             res.redirect('/');
