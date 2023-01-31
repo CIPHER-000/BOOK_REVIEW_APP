@@ -89,6 +89,9 @@ app.get('/signup', function(req, res) {
 app.get('/homepage', function(req, res) {
     res.sendFile(__dirname + '/views/templates/homepage.html');
 });
+app.get('/apology', function(req, res) {
+    res.sendFile(__dirname + '/views/templates/apology.html');
+});
 
 app.get('/static/styles.css', function(req, res) {
     res.set('Content-Type', 'text/css');
@@ -131,19 +134,18 @@ app.post('/signin', function(req, res, next) {
     let result = con.query(sql, [email, password], (err, result) => {
         if (err) {
             req.flash('error', 'Something went wrong. Please try again later.');
-            res.redirect('/');
+            req.sendFile("apology.html");
         }
         if (result.length > 0) {
             req.login(result[0], function(err) {
                 if (err) {
-                    req.flash('error', 'Something went wrong. Please try again later.');
-                    res.redirect('/');
+                    req.redirect("/apology");
                 }
                 res.redirect('/homepage');
             });
         } else {
             req.flash('error', 'Invalid email or password');
-            res.redirect('/');
+            res.redirect('/apology');
         }
     });
 });
