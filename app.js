@@ -91,11 +91,6 @@ app.get('/static/styles.css', function(req, res) {
 });
 
 
-app.post('/', passport.authenticate('local', {
-    successRedirect: '/homepage',
-    failureRedirect: '/',
-    failureFlash: true
-}));
 
 app.post('/', (req, res) => {
     const sql = 'INSERT INTO user (username, email, password) VALUES (?, ?, ?)';
@@ -105,8 +100,9 @@ app.post('/', (req, res) => {
     const username1 = req.body.username1;
     const password1 = req.body.password1;
 
+
     bcrypt.hash(password1, saltRounds, function(err, hash) {
-        con.query('INSERT INTO user (username, email, password) VALUES (?, ?, ?)', [username1, email, hash], function(err, result) {
+        con.query(sql, [username1, email, hash], function(err, result) {
             if (err) throw err;
             console.log('Form inputs inserted into database');
             console.log("Hash:", hash)
