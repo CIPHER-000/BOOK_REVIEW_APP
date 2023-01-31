@@ -24,7 +24,7 @@ con.connect(function(err) {
 });
 
 const secret = require('crypto').randomBytes(64).toString('hex');
-console.log("secret:", secret);
+console.log("Secret key:", secret);
 
 const session = require("express-session");
 app.use(session({
@@ -78,10 +78,15 @@ app.get('/', function(req, res) {
     res.sendFile(__dirname + '/views/templates/layout.html');
 });
 
+app.get('/signin', function(req, res) {
+    res.sendFile(__dirname + '/views/templates/layout.html');
+});
+
+app.get('/signup', function(req, res) {
+    res.sendFile(__dirname + '/views/templates/layout.html');
+});
+
 app.get('/homepage', function(req, res) {
-    if (!req.session.user) {
-        return res.redirect('/');
-    }
     res.sendFile(__dirname + '/views/templates/homepage.html');
 });
 
@@ -92,22 +97,54 @@ app.get('/static/styles.css', function(req, res) {
 
 
 
-app.post('/', (req, res) => {
+const { check, validationResult } = require('express-validator');
+
+app.post('/signup', [
+    check('email').isEmail().withMessage('Email is invalid'),
+    check('password1').isLength({ min: 8 }).withMessage('Password must be at least 8 characters long'),
+], (req, res) => {
+    const errors = validationResult(req);
     const sql = 'INSERT INTO user (username, email, password) VALUES (?, ?, ?)';
-    const username = req.body.username;
     const email = req.body.email;
-    const password = req.body.password;
     const username1 = req.body.username1;
     const password1 = req.body.password1;
-
+    if (!errors.isEmpty()) {
+        req.flash('error', errors.array().map(error => error.msg));
+        return res.redirect('/homepage');
+    }
 
     bcrypt.hash(password1, saltRounds, function(err, hash) {
         con.query(sql, [username1, email, hash], function(err, result) {
             if (err) throw err;
             console.log('Form inputs inserted into database');
             console.log("Hash:", hash)
-            res.redirect('/homepage');
+            res.redirect('/');
         });
+    });
+});
+
+app.post('/signin', function(req, res, next) {
+    let email = req.body.email;
+    let password = req.body.password;
+
+    let sql = "SELECT * FROM user WHERE email = ? AND password = ?";
+    con.query(sql, [email, password], (err, result) => {
+        if (err) {
+            req.flash('error', 'Something went wrong. Please try again later.');
+            res.redirect('/');
+        }
+        if (result.length > 0) {
+            req.login(result[0], function(err) {
+                if (err) {
+                    req.flash('error', 'Something went wrong. Please try again later.');
+                    res.redirect('/');
+                }
+                res.redirect('/homepage');
+            });
+        } else {
+            req.flash('error', 'Invalid email or password');
+            res.redirect('/');
+        }
     });
 });
 
