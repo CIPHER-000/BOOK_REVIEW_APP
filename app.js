@@ -92,12 +92,26 @@ app.get('/homepage', function(req, res) {
 app.get('/apology', function(req, res) {
     res.sendFile(__dirname + '/views/templates/apology.html');
 });
+app.get('/apologypass', function(req, res) {
+    res.sendFile(__dirname + '/views/templates/apologypass.html');
+});
+app.get('/apologyemail', function(req, res) {
+    res.sendFile(__dirname + '/views/templates/apologyemail.html');
+});
+
 
 app.get('/static/styles.css', function(req, res) {
     res.set('Content-Type', 'text/css');
     res.sendFile(__dirname + '/views/static/styles.css');
 });
-
+app.get('/static/apology.css', function(req, res) {
+    res.set('Content-Type', 'text/css');
+    res.sendFile(__dirname + '/views/static/apology.css');
+});
+app.get('/static/homepage.css', function(req, res) {
+    res.set('Content-Type', 'text/css');
+    res.sendFile(__dirname + '/views/static/homepage.css');
+});
 
 
 const { check, validationResult } = require('express-validator');
@@ -107,52 +121,80 @@ app.post('/signup', [
     check('password1').isLength({ min: 8 }).withMessage('Password must be at least 8 characters long'),
 ], (req, res) => {
     const errors = validationResult(req);
-    const sql = 'INSERT INTO user (username, email, password) VALUES (?, ?, ?)';
     const email = req.body.email;
     const username1 = req.body.username1;
     const password1 = req.body.password1;
-    if (!errors.isEmpty()) {
-        req.flash('error', errors.array().map(error => error.msg));
-        return res.redirect('/homepage');
-    }
 
-    bcrypt.hash(password1, saltRounds, function(err, hash) {
-        con.query(sql, [username1, email, hash], function(err, result) {
-            if (err) throw err;
-            console.log('Form inputs inserted into database');
-            console.log("Hash:", hash)
-            res.redirect('/homepage');
-        });
+
+    let sql = "SELECT * FROM user WHERE email = ?";
+    con.query(sql, [email], (err, result) => {
+        if (err) {
+            req.flash('error', 'Something went wrong. Please try again later.');
+            return res.redirect('/');
+        }
+        if (result.length > 0) {
+            req.flash('error', 'This email is already taken');
+            return res.redirect('/apology');
+        } else {
+            bcrypt.hash(password1, saltRounds, function(err, hash) {
+                if (err) {
+                    req.flash('error', 'Something went wrong. Please try again later.');
+                    return res.redirect('/');
+                }
+                let sql = 'INSERT INTO user (username, email, password) VALUES (?, ?, ?)';
+                con.query(sql, [username1, email, hash], function(err, result) {
+                    if (err) {
+                        req.flash('error', 'Something went wrong. Please try again later.');
+                        return res.redirect('/');
+                    }
+                    console.log('Form inputs inserted into database');
+                    req.flash('success', 'Your account has been created successfully.');
+                    return res.redirect('/homepage');
+                });
+            });
+        }
     });
 });
+
+
 
 app.post('/signin', function(req, res, next) {
     let email = req.body.email;
     let password = req.body.password;
 
-    let sql = "SELECT * FROM user WHERE email = ? AND password = ?";
-    let result = con.query(sql, [email, password], (err, result) => {
+    let sql = "SELECT * FROM user WHERE email = ?";
+    let results = con.query(sql, [email], (err, result) => {
         if (err) {
             req.flash('error', 'Something went wrong. Please try again later.');
-            req.sendFile("apology.html");
+            return res.redirect('/');
         }
         if (result.length > 0) {
-            req.login(result[0], function(err) {
+            bcrypt.compare(password, result[0].password, function(err, passwordMatch) {
                 if (err) {
-                    req.redirect("/apology");
+                    req.flash('error', 'Something went wrong. Please try again later.');
+                    return res.redirect('/');
                 }
-                res.redirect('/homepage');
+                if (passwordMatch) {
+                    req.session.user = result[0];
+                    return res.redirect('/homepage');
+                } else {
+                    req.flash('error', 'Invalid password');
+                    return res.redirect('/apologypass');
+                }
             });
         } else {
-            req.flash('error', 'Invalid email or password');
-            res.redirect('/apology');
+            req.flash('error', 'Invalid email');
+            return res.redirect('/apologyemail');
         }
     });
 });
 
 
+
+
+
 app.listen(8000, () => {
-    console.log('App listening on port 3000');
+    console.log('App listening on port 8000');
 });
 
 
