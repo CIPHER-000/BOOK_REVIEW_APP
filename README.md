@@ -1,5 +1,7 @@
 # BOOK_REVIEW_APP
 
+##AUTHENTICATION AND INSTALLATION EXPLANATION:
+
 This code is a Node.js script for creating an authentication system for a web application using the Express.js framework, MySQL as the database, and Passport.js as the authentication middleware.
 
 The first line const express = require('express'); loads the Express.js library, which is a web framework for Node.js.
