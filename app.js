@@ -1,4 +1,5 @@
 const express = require('express');
+const request = require("request");
 const app = express();
 const mysql = require('mysql2');
 const bodyParser = require('body-parser');
@@ -189,13 +190,97 @@ app.post('/signin', function(req, res, next) {
     });
 });
 
+////////////////////////////////////////////////////////////////////////////////////////Ignore for now
 
+// Get all the books information from the API
+_EXTERNAL_URL = 'https://openlibrary.org/api/books?bibkeys=ISBN:0451526538&callback=mycallback';
+
+const callExternalApiUsingRequest = (callback) => {
+    request(_EXTERNAL_URL, { json: true }, (err, res, body) => {
+        if (err) {
+            return callback(err);
+        }
+        return callback(body);
+    });
+}
+
+module.exports.callApi = callExternalApiUsingRequest;
+
+
+
+async function insertBooksIntoDB(books) {
+    try {
+        books = JSON.parse(responseBody);
+    } catch (e) {
+        console.error('Failed to parse response body:', e);
+        return;
+    }
+
+    if (Array.isArray(books)) {
+        await Promise.all(books.map(async book => {
+            try {
+                const [results] = await connection.query(
+                    `INSERT INTO book (title, author, published_date, isbn) 
+                   VALUES ('${book.title}', '${book.author}', '${book.published_date}', '${book.isbn}')`
+                );
+                console.log(results);
+            } catch (error) {
+                console.error(error);
+            }
+        }));
+    } else {
+        console.error('Books is not an array');
+    }
+};
+
+
+// Query the database for the user input
+async function searchBooks(query) {
+    try {
+        const [results] = await connection.query(
+            `
+                                SELECT * FROM book WHERE title LIKE '%${query}%'
+                                OR author LIKE '%${query}%'
+                                `
+        );
+        console.log(results);
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+async function main() {
+    try {
+        const books = await getBooksFromAPI();
+        await insertBooksIntoDB(books);
+        await searchBooks('Harry Potter');
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+//////////////////////////////////////////////////////////////////////Ignore for now
+
+
+app.get("/homepage", (req, res) => {
+    const query = 'SELECT * FROM book';
+    connection.query(query, (error, results) => {
+        if (error) {
+            console.error(error);
+            res.send('An error occurred');
+            return;
+        }
+        res.render('homepage', { books: results });
+    });
+});
 
 
 
 app.listen(8000, () => {
     console.log('App listening on port 8000');
 });
+
+
 
 
 
