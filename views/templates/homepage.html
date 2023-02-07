@@ -3,7 +3,7 @@
   <head>
       <meta charset="utf-8">
       <meta http-equiv="X-UA-Compatible" content="IE=edge">
-      <title>Bazam.org - Identify millions of books in seconds by context, keyword, or id</title>
+      <title>CriticReads.org - Identify millions of books in seconds by context, keyword, or id</title>
       <meta name="description" content="">
       <meta name="viewport" content="width=device-width, initial-scale=1">
       <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Slackey&family=Roboto:wght@100;300;900&display=swap" rel="stylesheet">
@@ -28,11 +28,18 @@
               .then(a => a.json())
               .then(response => {
                   for (var i = 0; i < response.docs.length; i++) {
-                      document.getElementById("output").innerHTML += "<h2>" + response.docs[i].title + "</h2>" + response.docs[i].author_name[0] + "<br><img src='http://covers.openlibrary.org/b/isbn/" + response.docs[i].isbn[0] + "-M.jpg'><br>";
+                    if (response.docs[i].cover_i) {
+                      document.getElementById("output").innerHTML += "<h2>" + response.docs[i].title + "</h2>" + response.docs[i].author_name[0] + "<br><img src='http://covers.openlibrary.org/b/id/" + response.docs[i].cover_i + "-M.jpg'><br>";
+                      document.getElementById("output").innerHTML += "Publication Date: " + response.docs[i].first_publish_year + "<br>";
+                      document.getElementById("output").innerHTML += "Genre: " + response.docs[i].subject + "<br>";
+                      document.getElementById("output").innerHTML += "Subject: " + response.docs[i].subject + "<br>";
+                      document.getElementById("output").innerHTML += "Reviews: " + response.docs[i].reviews + "<br>";
+                    }
                   }
               });
-        }
+        }        
       </script>
+      
 
       <div class="home-spacer">
         <h1 class="page-title">Identify a book in an instant</h1>
