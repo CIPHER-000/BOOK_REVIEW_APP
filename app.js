@@ -5,6 +5,7 @@ const mysql = require('mysql2');
 const bodyParser = require('body-parser');
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
+const axios = require('axios');
 
 var flash = require('connect-flash');
 app.use(flash());
@@ -34,44 +35,6 @@ app.use(session({
     saveUninitialized: false
 }));
 
-const passport = require('passport');
-const LocalStrategy = require('passport-local').Strategy;
-
-passport.use(new LocalStrategy(
-    function(username, password, done) {
-        const checkUser = 'SELECT * FROM user WHERE username = ?';
-        con.query(checkUser, [username], function(err, results) {
-            if (err) return done(err);
-            if (!results.length) {
-                return done(null, false, { message: 'Incorrect username' });
-            }
-            const hashedPassword = results[0].password;
-            bcrypt.compare(password, hashedPassword, function(err, isMatch) {
-                if (err) return done(err);
-                if (!isMatch) {
-                    return done(null, false, { message: 'Incorrect password' });
-                }
-                return done(null, results[0]);
-            });
-        });
-    }
-));
-
-passport.serializeUser(function(user, done) {
-    done(null, user.id);
-});
-
-passport.deserializeUser(function(id, done) {
-    const sql = 'SELECT * FROM user WHERE id = ?';
-    con.query(sql, [id], function(err, results) {
-        if (err) return done(err);
-        done(null, results[0]);
-    });
-});
-
-app.use(passport.initialize());
-app.use(passport.session());
-
 
 app.use(express.static('static'));
 
@@ -90,28 +53,40 @@ app.get('/signup', function(req, res) {
 app.get('/homepage', function(req, res) {
     res.sendFile(__dirname + '/views/templates/homepage.html');
 });
+
+
 app.get('/apology', function(req, res) {
     res.sendFile(__dirname + '/views/templates/apology.html');
 });
+
 app.get('/apologypass', function(req, res) {
     res.sendFile(__dirname + '/views/templates/apologypass.html');
 });
+
 app.get('/apologyemail', function(req, res) {
     res.sendFile(__dirname + '/views/templates/apologyemail.html');
 });
+
 
 
 app.get('/static/styles.css', function(req, res) {
     res.set('Content-Type', 'text/css');
     res.sendFile(__dirname + '/views/static/styles.css');
 });
+
 app.get('/static/apology.css', function(req, res) {
     res.set('Content-Type', 'text/css');
     res.sendFile(__dirname + '/views/static/apology.css');
 });
+
 app.get('/static/homepage.css', function(req, res) {
     res.set('Content-Type', 'text/css');
     res.sendFile(__dirname + '/views/static/homepage.css');
+});
+
+app.get('/static/books.css', function(req, res) {
+    res.set('Content-Type', 'text/css');
+    res.sendFile(__dirname + '/views/static/books.css');
 });
 
 
@@ -190,89 +165,8 @@ app.post('/signin', function(req, res, next) {
     });
 });
 
-////////////////////////////////////////////////////////////////////////////////////////Ignore for now
-
-// Get all the books information from the API
-_EXTERNAL_URL = 'https://openlibrary.org/api/books?bibkeys=ISBN:0451526538&callback=mycallback';
-
-const callExternalApiUsingRequest = (callback) => {
-    request(_EXTERNAL_URL, { json: true }, (err, res, body) => {
-        if (err) {
-            return callback(err);
-        }
-        return callback(body);
-    });
-}
-
-module.exports.callApi = callExternalApiUsingRequest;
 
 
-
-async function insertBooksIntoDB(books) {
-    try {
-        books = JSON.parse(responseBody);
-    } catch (e) {
-        console.error('Failed to parse response body:', e);
-        return;
-    }
-
-    if (Array.isArray(books)) {
-        await Promise.all(books.map(async book => {
-            try {
-                const [results] = await connection.query(
-                    `INSERT INTO book (title, author, published_date, isbn) 
-                   VALUES ('${book.title}', '${book.author}', '${book.published_date}', '${book.isbn}')`
-                );
-                console.log(results);
-            } catch (error) {
-                console.error(error);
-            }
-        }));
-    } else {
-        console.error('Books is not an array');
-    }
-};
-
-
-// Query the database for the user input
-async function searchBooks(query) {
-    try {
-        const [results] = await connection.query(
-            `
-                                SELECT * FROM book WHERE title LIKE '%${query}%'
-                                OR author LIKE '%${query}%'
-                                `
-        );
-        console.log(results);
-    } catch (error) {
-        console.error(error);
-    }
-}
-
-async function main() {
-    try {
-        const books = await getBooksFromAPI();
-        await insertBooksIntoDB(books);
-        await searchBooks('Harry Potter');
-    } catch (error) {
-        console.error(error);
-    }
-}
-
-//////////////////////////////////////////////////////////////////////Ignore for now
-
-
-app.get("/homepage", (req, res) => {
-    const query = 'SELECT * FROM book';
-    connection.query(query, (error, results) => {
-        if (error) {
-            console.error(error);
-            res.send('An error occurred');
-            return;
-        }
-        res.render('homepage', { books: results });
-    });
-});
 
 
 

@@ -1,0 +1,23 @@
+{
+  "name": "jquery-ajax",
+  "version": "2.1.4",
+  "description": "jQuery built with command: `grunt custom:-css,-deprecated,-dimensions,-effects,-event,-offset,-wrap,-sizzle,-core/ready`.",
+  "main": "jquery.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bolasblack/jquery-ajax.git"
+  },
+  "keywords": [
+    "jquery",
+    "ajax"
+  ],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/bolasblack/jquery-ajax/issues"
+  },
+  "homepage": "https://github.com/bolasblack/jquery-ajax#readme"
+}

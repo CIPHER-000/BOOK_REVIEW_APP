@@ -1,0 +1,34 @@
+<!doctype html>
+<html class="no-js" lang="">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title><%= title %> - CriticReads</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Slackey&family=Roboto:wght@100;300;900&display=swap" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="/views/static/book.css"/>
+    </head>
+    <body>
+        <!--[if lt IE 8]>
+            <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+        <![endif]-->
+        <div class="topbar">
+          <h1 class="logo">
+            <img src="/views/img/bazam-logo.png"/><a href="#">CriticReads</a>
+          </h1>
+        </div>
+
+        <div class="book-spacer">
+            <h1><%= title %></h1>
+            <h2>Authors: <%= authors %></h2>
+            <h2>Publication Date: <%= publication_date %></h2>
+            <h2>Genres: <%= genres %></h2>
+        </div>
+
+        <footer>
+          <p>An <a href="https://archivelab.org">Archive Labs</a> experiment 2020</p>
+        </footer>
+
+    </body>
+</html>
