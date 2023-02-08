@@ -10,6 +10,8 @@
       <link rel="stylesheet" type="text/css" href="/static/homepage.css"/>
       <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0-alpha1/jquery.min.js"></script>
       <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+      <!-- Font Awesome CSS -->
+      <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.1/css/all.css" integrity="sha384-vp86vTRFVJgpjF9jiIGPEEqYqlDwgyBgEF109VFjmqGmIY/Y4HV4d3Gp2irVfcrp" crossorigin="anonymous">
   </head>
   <body>
       <!--[if lt IE 8]>
@@ -25,22 +27,22 @@
         function getbooks() {
           document.getElementById("output").innerHTML = "";
           fetch("http://openlibrary.org/search.json?q=" + document.getElementById("input").value)
-              .then(a => a.json())
-              .then(response => {
-                  for (var i = 0; i < response.docs.length; i++) {
-                    if (response.docs[i].cover_i) {
-                      document.getElementById("output").innerHTML += "<h2>" + response.docs[i].title + "</h2>" + response.docs[i].author_name[0] + "<br><img src='http://covers.openlibrary.org/b/id/" + response.docs[i].cover_i + "-M.jpg'><br>";
-                      document.getElementById("output").innerHTML += "Publication Date: " + response.docs[i].first_publish_year + "<br>";
-                      document.getElementById("output").innerHTML += "Genre: " + response.docs[i].subject + "<br>";
-                      document.getElementById("output").innerHTML += "Subject: " + response.docs[i].subject + "<br>";
-                      document.getElementById("output").innerHTML += "Reviews: " + response.docs[i].reviews + "<br>";
+          .then(a => a.json())
+          .then(response => {
+              for (var i = 0; i < response.docs.length; i++) {
+                if (response.docs[i].cover_i) {
+                  document.getElementById("output").innerHTML += "<div style='display: inline-block; width: 33%; padding: 10px; text-align: center;'><h2>" + response.docs[i].title + "</h2>" + response.docs[i].author_name[0] + "<br><img src='http://covers.openlibrary.org/b/id/" + response.docs[i].cover_i + "-M.jpg'><br>";
+                  document.getElementById("output").innerHTML += "Publication Date: " + response.docs[i].first_publish_year + "<br>";
+                  document.getElementById("output").innerHTML += "Genre: " + response.docs[i].subject.slice(0, 5).join(', ') + "<br>";
+                  document.getElementById("output").innerHTML += "Subject: " + response.docs[i].subject.slice(0, 5).join(', ') + "<br>";
+                  document.getElementById("output").innerHTML += "Reviews: " + response.docs[i].reviews + "<br>";
+                  document.getElementById("output").innerHTML += "<div class='rating'>Rate this book: "
+                      }
                     }
-                  }
-              });
-        }        
-      </script>
+                });
+          }
+    </script>
       
-
       <div class="home-spacer">
         <h1 class="page-title">Identify a book in an instant</h1>
         <input id="input" name="query" type="text" autofocus placeholder="Search for a quote, text, or keywords">
