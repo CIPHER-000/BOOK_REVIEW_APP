@@ -10,6 +10,14 @@ body {
     color: #fff;
 }
 
+button {
+    margin-left: 565px;
+    margin-top: 80px;
+    padding: 18px;
+    border-radius: 20px;
+    border-color: #fff;
+}
+
 .topbar {
     background-color: #fff;
     color: #222;
