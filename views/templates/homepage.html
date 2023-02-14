@@ -7,7 +7,7 @@
       <meta name="description" content="">
       <meta name="viewport" content="width=device-width, initial-scale=1">
       <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Slackey&family=Roboto:wght@100;300;900&display=swap" rel="stylesheet">
-      <link rel="stylesheet" type="text/css" href="/static/homepage.css"/>
+      <link rel="stylesheet" type="text/css" href="/static/homepage.css">
       <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0-alpha1/jquery.min.js"></script>
       <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
       <!-- Font Awesome CSS -->
@@ -22,29 +22,99 @@
           <img src="/img/bazam-logo.png"/><a href="#">CriticReads</a>
         </h1>
       </div>
+      <br>
   
-      <script>        
+      
+      <script>
         function getbooks() {
           document.getElementById("output").innerHTML = "";
-          fetch("http://openlibrary.org/search.json?q=" + document.getElementById("input").value)
-          .then(a => a.json())
-          .then(response => {
-              for (var i = 0; i < response.docs.length; i++) {
+          let inputValue = document.getElementById("input").value;
+          fetch(`http://openlibrary.org/search.json?q=${inputValue}`)
+            .then((response) => {
+              return response.json();
+            })
+            .then((response) => {
+              for (let i = 0; i < response.docs.length; i++) {
                 if (response.docs[i].cover_i) {
-                  document.getElementById("output").innerHTML += "<div style='display: inline-block; width: 33%; padding: 10px; text-align: center;'><h2>" + response.docs[i].title + "</h2>" + response.docs[i].author_name[0] + "<br><img src='http://covers.openlibrary.org/b/id/" + response.docs[i].cover_i + "-M.jpg'><br>";
-                  document.getElementById("output").innerHTML += "Publication Date: " + response.docs[i].first_publish_year + "<br>";
-                  document.getElementById("output").innerHTML += "Genre: " + response.docs[i].subject.slice(0, 5).join(', ') + "<br>";
-                  document.getElementById("output").innerHTML += "Subject: " + response.docs[i].subject.slice(0, 5).join(', ') + "<br>";
-                  document.getElementById("output").innerHTML += "Reviews: " + response.docs[i].reviews + "<br>";
-                  document.getElementById("output").innerHTML += "<div class='rating'>Rate this book: "
-                      }
-                    }
+                  document.getElementById("output").innerHTML += `
+                  <div style='display: inline-block; width: 33%; padding: 10px; text-align: center;'>
+                    <h2>${response.docs[i].title}</h2>
+                    ${response.docs[i].author_name[0]}<br>
+                    <img src='http://covers.openlibrary.org/b/id/${response.docs[i].cover_i}-M.jpg'><br>
+                    Publication Date: ${response.docs[i].first_publish_year}<br>
+                    Genre: ${response.docs[i].subject.slice(0, 5).join(', ')}<br>
+                    Description: ${response.docs[i].description || "Not available"}<br>
+                    Review: ${response.docs[i].review || "Not available"}<br>
+                    <br>
+                    <button onclick='insertBook()'>Add Book</button>
+                  </div>`;
+                }
+              }
+            });
+        }
+
+        
+        function insertBook(title, author, description, review, publicationDate, coverImage, genre) {
+          // Connect to the database
+          const connection = mysql.createConnection({
+            host: "localhost",
+            user: "root",
+            password: "root_toor",
+            database: "review book"
+          });
+        
+          connection.connect(function(err) {
+            if (err) {
+              console.error("Error connecting to the database: " + err.stack);
+              return;
+            }
+            console.log("Connected to the database as id " + connection.threadId);
+          });
+        
+          // Fetch the book's information from the OpenLibrary API
+          fetch(`http://openlibrary.org/search.json?title=${title}`)
+            .then((response) => {
+              return response.json();
+            })
+            .then((response) => {
+              // Get the book information from the API response
+              const book = response.docs[0];
+              const publicationDate = book.first_publish_year;
+              const description = book.description || "Not available";
+              const review = book.review || "Not available";
+              const coverImage = `http://covers.openlibrary.org/b/id/${book.cover_i}-M.jpg`;
+              const genre = book.subject.slice(0, 5).join(', ');
+        
+              // Insert the book's information into the database
+              const sql =
+                "INSERT INTO book (title, author, description, publication_date, cover_image, reviews, genre) VALUES (?, ?, ?, ?, ?, ?, ?)";
+              const values = [title, author, description, publicationDate, coverImage, review, genre];
+        
+              connection.query(sql, values, function(error, results, fields) {
+                if (error) {
+                  console.log("Error inserting the book into the database: " + error);
+                } else {
+                  console.log("Book added to the database successfully");
+                }
+        
+                // Close the connection
+                connection.end(function(err) {
+                  if (err) {
+                    console.error("Error closing the database connection: " + err.stack);
+                    return;
+                  }
+                  console.log("Closed the database connection");
                 });
-          }
-    </script>
-      
+              });
+            });
+        }
+      </script>
+
+
+     
       <div class="home-spacer">
         <h1 class="page-title">Identify a book in an instant</h1>
+        <br>
         <input id="input" name="query" type="text" autofocus placeholder="Search for a quote, text, or keywords">
         <button onclick="getbooks()"> Get Books </button>
         <br>
@@ -56,7 +126,7 @@
       </div>
   
       <footer>
-        <p>An <a href="https://archivelab.org">Archive Labs</a> experiment 2020</p>
+        
       </footer>
     
   </body>
