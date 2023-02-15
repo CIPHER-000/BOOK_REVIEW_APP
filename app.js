@@ -6,6 +6,12 @@ const bodyParser = require('body-parser');
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
 const axios = require('axios');
+const router = express.Router();
+const fetch = require('node-fetch');
+
+
+app.use(bodyParser.json());
+
 
 var flash = require('connect-flash');
 app.use(flash());
@@ -53,6 +59,9 @@ app.get('/signup', function(req, res) {
 app.get('/homepage', function(req, res) {
     res.sendFile(__dirname + '/views/templates/homepage.html');
 });
+app.get('/mybooks', function(req, res) {
+    res.sendFile(__dirname + '/views/templates/books.html');
+});
 
 
 app.get('/apology', function(req, res) {
@@ -91,6 +100,7 @@ app.get('/static/books.css', function(req, res) {
 
 
 const { check, validationResult } = require('express-validator');
+const { render } = require('pug');
 
 app.post('/signup', [
     check('email').isEmail().withMessage('Email is invalid'),
@@ -166,6 +176,47 @@ app.post('/signin', function(req, res, next) {
 });
 
 
+router.post('/homepage', (req, res) => {
+    // Fetch the book's information from the OpenLibrary API
+    fetch(`http://openlibrary.org/search.json?title=${title}`)
+        .then((response) => {
+            return response.json();
+        })
+        .then((response) => {
+            // Get the book information from the API response
+            const book = response.docs[0];
+            const publicationDate = book.first_publish_year;
+            const description = book.description || "Not available";
+            const review = book.review || "Not available";
+            const coverImage = `http://covers.openlibrary.org/b/id/${book.cover_i}-M.jpg`;
+            const genre = book.subject.slice(0, 5).join(', ');
+
+            // Insert the book's information into the database
+            const sql =
+                "INSERT INTO book (title, author, description, publication_date, cover_image, reviews, genre) VALUES (?, ?, ?, ?, ?, ?, ?)";
+            const values = [title, author, description, publicationDate, coverImage, review, genre];
+
+            con.query(sql, values, function(error, results, fields) {
+                if (error) {
+                    console.log("Error inserting the book into the database: " + error);
+                } else {
+                    console.log("Book added to the database successfully");
+                    res.redirect("/mybooks");
+                }
+
+                // Close the connection
+                connection.end(function(err) {
+                    if (err) {
+                        console.error("Error closing the database connection: " + err.stack);
+                        return;
+                    }
+                    console.log("Closed the database connection");
+                });
+            });
+        });
+});
+
+module.exports = router;
 
 
 

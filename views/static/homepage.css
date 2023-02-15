@@ -100,7 +100,17 @@ body {
     color: #fff;
 }
 
-button {
+.button2 {
+    margin-left: auto;
+    margin-right: 15px;
+    border-radius: 5px;
+    border-color: #fff;
+    padding: 18px;
+    color: white;
+    background-color: #000;
+}
+
+.button {
     margin-left: 565px;
     margin-top: 80px;
     padding: 18px;
@@ -108,9 +118,29 @@ button {
     border-color: #fff;
 }
 
+.button1 {
+    padding: 10px;
+    display: inline-block;
+    /* add this property */
+}
+
+.button1 span {
+    display: inline-block;
+    /* add this property */
+    text-align: center;
+    /* add this property */
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: -10px;
+    padding-bottom: -10px;
+}
+
 .topbar {
     background-color: #fff;
     color: #222;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .topbar h1.logo {

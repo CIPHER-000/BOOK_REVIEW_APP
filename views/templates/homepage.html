@@ -21,6 +21,7 @@
         <h1 class="logo">
           <img src="/img/bazam-logo.png"/><a href="#">CriticReads</a>
         </h1>
+        <button class="button2" onclick='mybooks()'><span> My Books </span></button>
       </div>
       <br>
   
@@ -45,78 +46,24 @@
                     Genre: ${response.docs[i].subject.slice(0, 5).join(', ')}<br>
                     Description: ${response.docs[i].description || "Not available"}<br>
                     Review: ${response.docs[i].review || "Not available"}<br>
+                    <div class='rating'>Rate this book:</div>
                     <br>
-                    <button onclick='insertBook()'>Add Book</button>
+                    <button class="button1"><span> Add Book </span></button>
                   </div>`;
                 }
               }
             });
         }
-
-        
-        function insertBook(title, author, description, review, publicationDate, coverImage, genre) {
-          // Connect to the database
-          const connection = mysql.createConnection({
-            host: "localhost",
-            user: "root",
-            password: "root_toor",
-            database: "review book"
-          });
-        
-          connection.connect(function(err) {
-            if (err) {
-              console.error("Error connecting to the database: " + err.stack);
-              return;
-            }
-            console.log("Connected to the database as id " + connection.threadId);
-          });
-        
-          // Fetch the book's information from the OpenLibrary API
-          fetch(`http://openlibrary.org/search.json?title=${title}`)
-            .then((response) => {
-              return response.json();
-            })
-            .then((response) => {
-              // Get the book information from the API response
-              const book = response.docs[0];
-              const publicationDate = book.first_publish_year;
-              const description = book.description || "Not available";
-              const review = book.review || "Not available";
-              const coverImage = `http://covers.openlibrary.org/b/id/${book.cover_i}-M.jpg`;
-              const genre = book.subject.slice(0, 5).join(', ');
-        
-              // Insert the book's information into the database
-              const sql =
-                "INSERT INTO book (title, author, description, publication_date, cover_image, reviews, genre) VALUES (?, ?, ?, ?, ?, ?, ?)";
-              const values = [title, author, description, publicationDate, coverImage, review, genre];
-        
-              connection.query(sql, values, function(error, results, fields) {
-                if (error) {
-                  console.log("Error inserting the book into the database: " + error);
-                } else {
-                  console.log("Book added to the database successfully");
-                }
-        
-                // Close the connection
-                connection.end(function(err) {
-                  if (err) {
-                    console.error("Error closing the database connection: " + err.stack);
-                    return;
-                  }
-                  console.log("Closed the database connection");
-                });
-              });
-            });
-        }
       </script>
 
 
-     
       <div class="home-spacer">
         <h1 class="page-title">Identify a book in an instant</h1>
         <br>
         <input id="input" name="query" type="text" autofocus placeholder="Search for a quote, text, or keywords">
-        <button onclick="getbooks()"> Get Books </button>
+        <button class="button" onclick="getbooks()"> Get Books </button>
+        <br>
+        <br>
         <br>
         <div id="output"></div>
 
