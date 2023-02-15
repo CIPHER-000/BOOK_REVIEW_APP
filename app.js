@@ -59,6 +59,7 @@ app.get('/signup', function(req, res) {
 app.get('/homepage', function(req, res) {
     res.sendFile(__dirname + '/views/templates/homepage.html');
 });
+
 app.get('/mybooks', function(req, res) {
     res.sendFile(__dirname + '/views/templates/books.html');
 });
@@ -100,7 +101,7 @@ app.get('/static/books.css', function(req, res) {
 
 
 const { check, validationResult } = require('express-validator');
-const { render } = require('pug');
+
 
 app.post('/signup', [
     check('email').isEmail().withMessage('Email is invalid'),
@@ -176,36 +177,51 @@ app.post('/signin', function(req, res, next) {
 });
 
 
-router.post('/homepage', (req, res) => {
-    // Fetch the book's information from the OpenLibrary API
-    fetch(`http://openlibrary.org/search.json?title=${title}`)
-        .then((response) => {
-            return response.json();
-        })
-        .then((response) => {
-            // Get the book information from the API response
-            const book = response.docs[0];
-            const publicationDate = book.first_publish_year;
-            const description = book.description || "Not available";
-            const review = book.review || "Not available";
-            const coverImage = `http://covers.openlibrary.org/b/id/${book.cover_i}-M.jpg`;
-            const genre = book.subject.slice(0, 5).join(', ');
+app.post('/homepage', (req, res) => {
+    const { title, author, publication_date, description, reviews, cover_image, genre, bio } = req.body;
+    console.log(title)
+    console.log(author)
+    console.log(publication_date)
+    console.log(description)
+    console.log(reviews)
+    console.log(cover_image)
+    console.log(genre)
+    console.log(bio)
 
-            // Insert the book's information into the database
-            const sql =
-                "INSERT INTO book (title, author, description, publication_date, cover_image, reviews, genre) VALUES (?, ?, ?, ?, ?, ?, ?)";
-            const values = [title, author, description, publicationDate, coverImage, review, genre];
+    const bookSql =
+        "INSERT INTO book (title, author, description, publication_date, cover_image, reviews, genre) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    const bookValues = [title, author, description, publication_date, cover_image, reviews, genre];
 
-            con.query(sql, values, function(error, results, fields) {
+    const authorSql =
+        "INSERT INTO author (name, bio) VALUES (?, ?)";
+    const authorValues = [author, bio];
+
+    console.log("reaches here!!!");
+
+    con.connect(function(err) {
+        if (err) {
+            console.error("Error connecting to database: " + err.stack);
+            console.log("Error connecting to the database!!!");
+            return;
+        }
+        console.log("Connected to database successfully");
+
+        con.query(authorSql, authorValues, function(error, authorResults, fields) {
+            if (error) {
+                console.log("Error inserting the author into the database: " + error);
+            } else {
+                console.log("Author added to the database successfully");
+            }
+
+            con.query(bookSql, bookValues, function(error, bookResults, fields) {
                 if (error) {
                     console.log("Error inserting the book into the database: " + error);
                 } else {
                     console.log("Book added to the database successfully");
-                    res.redirect("/mybooks");
+                    res.redirect("/mybooks"); // redirect to /mybooks page
                 }
 
-                // Close the connection
-                connection.end(function(err) {
+                con.end(function(err) {
                     if (err) {
                         console.error("Error closing the database connection: " + err.stack);
                         return;
@@ -214,9 +230,8 @@ router.post('/homepage', (req, res) => {
                 });
             });
         });
+    });
 });
-
-module.exports = router;
 
 
 
