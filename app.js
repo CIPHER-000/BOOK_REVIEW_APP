@@ -177,6 +177,8 @@ app.post('/signin', function(req, res, next) {
 });
 
 
+
+
 app.post('/homepage', (req, res) => {
     const { title, author, publication_date, description, reviews, cover_image, genre, bio } = req.body;
     console.log(title)
@@ -211,24 +213,17 @@ app.post('/homepage', (req, res) => {
                 console.log("Error inserting the author into the database: " + error);
             } else {
                 console.log("Author added to the database successfully");
-            }
 
-            con.query(bookSql, bookValues, function(error, bookResults, fields) {
-                if (error) {
-                    console.log("Error inserting the book into the database: " + error);
-                } else {
-                    console.log("Book added to the database successfully");
-                    res.redirect("/mybooks"); // redirect to /mybooks page
-                }
 
-                con.end(function(err) {
-                    if (err) {
-                        console.error("Error closing the database connection: " + err.stack);
-                        return;
+                con.query(bookSql, bookValues, function(error, bookResults, fields) {
+                    if (error) {
+                        console.log("Error inserting the book into the database: " + error);
+                    } else {
+                        console.log("Book added to the database successfully");
+                        res.redirect("/mybooks"); // redirect to /mybooks page
                     }
-                    console.log("Closed the database connection");
                 });
-            });
+            }
         });
     });
 });
