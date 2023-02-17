@@ -1,34 +1,80 @@
 <!doctype html>
 <html class="no-js" lang="">
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <title><%= title %> - CriticReads</title>
-        <meta name="description" content="">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Slackey&family=Roboto:wght@100;300;900&display=swap" rel="stylesheet">
-        <link rel="stylesheet" type="text/css" href="/views/static/book.css"/>
-    </head>
-    <body>
-        <!--[if lt IE 8]>
-            <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
-        <![endif]-->
-        <div class="topbar">
-          <h1 class="logo">
-            <img src="/views/img/bazam-logo.png"/><a href="#">CriticReads</a>
-          </h1>
-        </div>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title><%= title %> - CriticReads</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Slackey&family=Roboto:wght@100;300;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="/static/book.css"/>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0-alpha1/jquery.min.js"></script>
+      <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+      <!-- Font Awesome CSS -->
+      <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.1/css/all.css" integrity="sha384-vp86vTRFVJgpjF9jiIGPEEqYqlDwgyBgEF109VFjmqGmIY/Y4HV4d3Gp2irVfcrp" crossorigin="anonymous">
+  </head>
+  <body>
+    <!--[if lt IE 8]>
+        <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+    <![endif]-->
+    <div class="topbar">
+      <h1 class="logo">
+        <img src="/views/img/bazam-logo.png"/><a href="#">CriticReads</a>
+      </h1>
+    </div>
 
-        <div class="book-spacer">
-            <h1><%= title %></h1>
-            <h2>Authors: <%= authors %></h2>
-            <h2>Publication Date: <%= publication_date %></h2>
-            <h2>Genres: <%= genres %></h2>
-        </div>
+    <div id="output" style="display: flex; flex-wrap: wrap; justify-content: space-around;">
+    
+    </div>
 
-        <footer>
-          <p>An <a href="https://archivelab.org">Archive Labs</a> experiment 2020</p>
-        </footer>
+    <footer>
+      <p>An <a href="https://archivelab.org">Archive Labs</a> experiment 2020</p>
+    </footer>
 
-    </body>
+    <script>
+      // Cache the DOM elements to reduce query time
+      const outputElem = document.getElementById('output');
+      const inputElem = document.getElementById('input');
+    
+      function getBooks() {
+        outputElem.innerHTML = '';
+        const inputValue = inputElem.value;
+    
+        // Use template literals to construct the URL for the API call
+        fetch(`/books?q=${inputValue}`)
+          .then(response => response.json())
+          .then(books => {
+            const booksHTML = books
+              .map(book => `
+                <div style="display: flex; flex-direction: column;">
+                  <div style="flex: 1;">
+                    <h2>${book.title}</h2>
+                    <p>Author: ${book.author}</p>
+                    <img src="${book.cover}" alt="${book.title}">
+                  </div>
+                  <div style="flex: 2;">
+                    <p>Author Bio: ${book.author_bio || 'Not available'}</p>
+                    <p>Publication Date: ${book.publication_date}</p>
+                    <p>Genre: ${book.genre}</p>
+                    <p>Description: ${book.description || 'Not available'}</p>
+                    <p>Review: ${book.review || 'Not available'}</p>
+                    <div class="rating">Rate this book:</div>
+                    <br>
+                    <button class="button1" onclick="addBook('${book.title}', '${book.author}', '${book.author_bio || 'Not available'}', '${book.publication_date}', '${book.description || 'Not available'}', '${book.review || 'Not available'}', '${book.cover}', '${book.genre}')">
+                      <span>Add Book</span>
+                    </button>
+                  </div>
+                </div>
+              `)
+              .join('');
+    
+            // Use innerHTML to update the output element with all the books at once
+            outputElem.innerHTML = `<div style="display: flex; flex-wrap: wrap; justify-content: space-between;">${booksHTML}</div>`;
+          })
+          .catch(error => {
+            console.log(error);
+          });
+      }
+    </script>    
+  </body>
 </html>

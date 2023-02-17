@@ -36,7 +36,7 @@ console.log("Secret key:", secret);
 
 const session = require("express-session");
 app.use(session({
-    secret,
+    secret: secret,
     resave: false,
     saveUninitialized: false
 }));
