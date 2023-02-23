@@ -67,7 +67,15 @@ app.get('/mybooks', function(req, res) {
         if (err) throw err;
         let booksHTML = "";
         booksHTML += `
-        <h3 style='text-align: center;'>My Books</h3>`
+        <section style='position: fixed; top: 0; width: 100%; z-index: 1; background-color: black; padding-bottom: -10px;'>
+            <h1 style='text-align: center; color: white; margin: 0; padding: 10px 20px; font-size: 1.5em; text-decoration: none; letter-spacing: 1px; font-family: 'Slackey', cursive;'>My Books</h1>
+        </section>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        `
         for (let i = 0; i < result.length; i++) {
             const book = result[i];
             let imgSql = "SELECT cover_image FROM book WHERE id = ?";
