@@ -72,7 +72,7 @@ app.get('/mybooks', function(req, res) {
                 <div style='display: inline-block; width: 23%; padding: 10px; text-align: left;'>
                     <h2>${book.title}</h2>
                     <p>Author: ${book.author}</p>
-                    <img src="${book.cover}" alt="${book.title}">
+                    <img src='../${book.cover}' alt="${book.title}" width='150' height='200'>
                     <p>Author Bio: ${book.author_bio || 'Not available'}</p>
                     <p>Publication Date: ${book.publication_date}</p>
                     <p>Genre: ${book.genre}</p>
