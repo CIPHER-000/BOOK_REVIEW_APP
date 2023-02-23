@@ -67,9 +67,16 @@ app.get('/mybooks', function(req, res) {
         if (err) throw err;
         let booksHTML = "";
         booksHTML += `
-        <section style='position: fixed; top: 0; width: 100%; z-index: 1; background-color: black; padding-bottom: -10px;'>
-            <h1 style='text-align: center; color: white; margin: 0; padding: 10px 20px; font-size: 1.5em; text-decoration: none; letter-spacing: 1px; font-family: 'Slackey', cursive;'>My Books</h1>
-        </section>
+        <style>
+            body {
+                width: 100%;
+                margin: 0;
+                padding: 0;
+            }
+        </style>
+        <div style='position: fixed; top: 0; width: 100%; z-index: 1; background-color: black; padding: 10px;'>
+            <h1 style='text-align: center; color: white; margin: 0; font-size: 1.5em; text-decoration: none; letter-spacing: 1px; font-family: "Slackey", cursive;'>My Books</h1>
+        </div>
         <br>
         <br>
         <br>
@@ -83,18 +90,19 @@ app.get('/mybooks', function(req, res) {
                 if (err) throw err;
                 let imgData = imgResult[0].cover_image;
                 booksHTML += `
-            <div style='display: inline-block; width: 23%; padding: 10px; text-align: left;'>
-              <h2>${book.title}</h2>
-              <p>Author: ${book.author}</p>
-              <img src="${imgData}" alt="${book.title}" style='width: 53%; height: 36%;'>
-              <p>Author Bio: ${book.author_bio || 'Not available'}</p>
-              <p>Publication Date: ${book.publication_date}</p>
-              <p>Genre: ${book.genre}</p>
-              <p>Description: ${book.description || 'Not available'}</p>
-              <p>Review: ${book.review || 'Not available'}</p>
-              <hr>
-            </div>
-          `;
+                <div style='display: inline-block; width: 23%; padding: 30px; text-align: left; margin-right: -40px; margin-bottom: 10px;'>
+                    <h2>${book.title}</h2>
+                    <p>Author: ${book.author}</p>
+                    <img src="${imgData}" alt="${book.title}" style='width: 53%; height: 36%;'>
+                    <p>Author Bio: ${book.author_bio || 'Not available'}</p>
+                    <p>Publication Date: ${book.publication_date}</p>
+                    <p>Genre: ${book.genre}</p>
+                    <p>Description: ${book.description || 'Not available'}</p>
+                    <p>Review: ${book.review || 'Not available'}</p>
+                    <hr>
+                </div>
+            `;
+
                 if (i === result.length - 1) {
                     res.send(booksHTML);
                 }
