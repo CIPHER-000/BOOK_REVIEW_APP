@@ -90,7 +90,7 @@ app.get('/mybooks', function(req, res) {
                 if (err) throw err;
                 let imgData = imgResult[0].cover_image;
                 booksHTML += `
-                <div style='display: inline-block; width: 23%; padding: 30px; text-align: left; margin-right: -40px; margin-bottom: 10px;'>
+                <div style='display: inline-block; width: 23%; padding: 30px; text-align: left; margin-right: -38px; margin-bottom: 10px;'>
                     <h2>${book.title}</h2>
                     <p>Author: ${book.author}</p>
                     <img src="${imgData}" alt="${book.title}" style='width: 53%; height: 36%;'>
