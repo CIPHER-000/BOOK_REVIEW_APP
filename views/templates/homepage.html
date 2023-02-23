@@ -45,7 +45,7 @@
                     .then((authorResponse) => {
                       const authorBio = authorResponse.bio || 'Not available';
                       document.getElementById('output').innerHTML += `
-                        <div style='display: inline-block; width: 33%; padding: 10px; text-align: center;'>
+                        <div style='display: inline-block; width: 33%; padding: 10px; text-align: left;'>
                           Title: <h2>${response.docs[i].title}</h2>
                           Author: ${response.docs[i].author_name[0]}<br>                         
                           <img src='http://covers.openlibrary.org/b/id/${response.docs[i].cover_i}-M.jpg'><br>
@@ -57,6 +57,7 @@
                           <div class='rating'>Rate this book:</div>
                           <br>
                           <button class='button1' onclick='addBook("${response.docs[i].title}", "${response.docs[i].author_name[0]}", "${authorBio}", "${response.docs[i].first_publish_year}", "${response.docs[i].description || 'Not available'}", "${response.docs[i].review || 'Not available'}", "http://covers.openlibrary.org/b/id/${response.docs[i].cover_i}-M.jpg", "${response.docs[i].subject.slice(0, 5).join(', ')}")' ><span> Add Book </span></button>
+                          <hr>
                         </div>`;
                     });
                 }

@@ -60,9 +60,32 @@ app.get('/homepage', function(req, res) {
     res.sendFile(__dirname + '/views/templates/homepage.html');
 });
 
+
 app.get('/mybooks', function(req, res) {
-    res.sendFile(__dirname + '/views/templates/books.html');
+    let sql = "SELECT * FROM book";
+    con.query(sql, function(err, result) {
+        if (err) throw err;
+        let booksHTML = "";
+        for (let i = 0; i < result.length; i++) {
+            const book = result[i];
+            booksHTML += `
+                <div style='display: inline-block; width: 23%; padding: 10px; text-align: left;'>
+                    <h2>${book.title}</h2>
+                    <p>Author: ${book.author}</p>
+                    <img src="${book.cover}" alt="${book.title}">
+                    <p>Author Bio: ${book.author_bio || 'Not available'}</p>
+                    <p>Publication Date: ${book.publication_date}</p>
+                    <p>Genre: ${book.genre}</p>
+                    <p>Description: ${book.description || 'Not available'}</p>
+                    <p>Review: ${book.review || 'Not available'}</p>
+                    <hr>
+                </div>
+            `;
+        }
+        res.send(booksHTML);
+    });
 });
+
 
 
 app.get('/apology', function(req, res) {
@@ -246,6 +269,11 @@ app.listen(8000, () => {
 //The app connects to a MySQL database with the connection details host: 'localhost', user: 'root', password: 'root_toor', database: 'review book'.
 
 //The authentication is done using passport and the LocalStrategy strategy.The user inputs are checked against the stored user information in the database.The password is hashed using bcrypt.
+
+//The code serves HTML pages and CSS files to the client.The user can either log in or sign up by submitting a form in the '/'
+//endpoint.If the authentication is successful, the user is redirected to the homepage, otherwise the user is redirected back to the login page with a failure flash message.
+
+//When a user signs up, the form inputs are inserted into the MySQL database using an SQL query.The password is hashed and stored in the database.database.The password is hashed using bcrypt.
 
 //The code serves HTML pages and CSS files to the client.The user can either log in or sign up by submitting a form in the '/'
 //endpoint.If the authentication is successful, the user is redirected to the homepage, otherwise the user is redirected back to the login page with a failure flash message.
