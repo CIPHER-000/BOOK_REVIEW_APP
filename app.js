@@ -68,21 +68,28 @@ app.get('/mybooks', function(req, res) {
         let booksHTML = "";
         for (let i = 0; i < result.length; i++) {
             const book = result[i];
-            booksHTML += `
-                <div style='display: inline-block; width: 23%; padding: 10px; text-align: left;'>
-                    <h2>${book.title}</h2>
-                    <p>Author: ${book.author}</p>
-                    <img src='../${book.cover}' alt="${book.title}" width='150' height='200'>
-                    <p>Author Bio: ${book.author_bio || 'Not available'}</p>
-                    <p>Publication Date: ${book.publication_date}</p>
-                    <p>Genre: ${book.genre}</p>
-                    <p>Description: ${book.description || 'Not available'}</p>
-                    <p>Review: ${book.review || 'Not available'}</p>
-                    <hr>
-                </div>
-            `;
+            let imgSql = "SELECT cover_image FROM book WHERE id = ?";
+            con.query(imgSql, [book.id], function(err, imgResult) {
+                if (err) throw err;
+                let imgData = imgResult[0].cover_image;
+                booksHTML += `
+            <div style='display: inline-block; width: 23%; padding: 10px; text-align: left;'>
+              <h2>${book.title}</h2>
+              <p>Author: ${book.author}</p>
+              <img src="${imgData}" alt="${book.title}">
+              <p>Author Bio: ${book.author_bio || 'Not available'}</p>
+              <p>Publication Date: ${book.publication_date}</p>
+              <p>Genre: ${book.genre}</p>
+              <p>Description: ${book.description || 'Not available'}</p>
+              <p>Review: ${book.review || 'Not available'}</p>
+              <hr>
+            </div>
+          `;
+                if (i === result.length - 1) {
+                    res.send(booksHTML);
+                }
+            });
         }
-        res.send(booksHTML);
     });
 });
 
