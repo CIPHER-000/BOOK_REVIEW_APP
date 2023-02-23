@@ -46,9 +46,9 @@
                       const authorBio = authorResponse.bio || 'Not available';
                       document.getElementById('output').innerHTML += `
                         <div style='display: inline-block; width: 33%; padding: 10px; text-align: left;'>
-                          Title: <h2>${response.docs[i].title}</h2>
+                          <h2>${response.docs[i].title}</h2>
                           Author: ${response.docs[i].author_name[0]}<br>                         
-                          <img src='http://covers.openlibrary.org/b/id/${response.docs[i].cover_i}-M.jpg'><br>
+                          <img src='http://covers.openlibrary.org/b/id/${response.docs[i].cover_i}-M.jpg' style='height: 300px; width: 200px;'><br>
                           Author Bio: ${authorBio}<br>
                           Publication Date: ${response.docs[i].first_publish_year}<br>
                           Genre: ${response.docs[i].subject.slice(0, 5).join(', ')}<br>

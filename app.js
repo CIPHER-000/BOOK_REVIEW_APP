@@ -66,6 +66,8 @@ app.get('/mybooks', function(req, res) {
     con.query(sql, function(err, result) {
         if (err) throw err;
         let booksHTML = "";
+        booksHTML += `
+        <h3 style='text-align: center;'>My Books</h3>`
         for (let i = 0; i < result.length; i++) {
             const book = result[i];
             let imgSql = "SELECT cover_image FROM book WHERE id = ?";
@@ -76,7 +78,7 @@ app.get('/mybooks', function(req, res) {
             <div style='display: inline-block; width: 23%; padding: 10px; text-align: left;'>
               <h2>${book.title}</h2>
               <p>Author: ${book.author}</p>
-              <img src="${imgData}" alt="${book.title}">
+              <img src="${imgData}" alt="${book.title}" style='width: 53%; height: 36%;'>
               <p>Author Bio: ${book.author_bio || 'Not available'}</p>
               <p>Publication Date: ${book.publication_date}</p>
               <p>Genre: ${book.genre}</p>
