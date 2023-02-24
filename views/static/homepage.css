@@ -141,6 +141,12 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    /* add background color */
+    z-index: 1;
+    /* add a higher z-index value to ensure the element is on top */
 }
 
 .topbar h1.logo {

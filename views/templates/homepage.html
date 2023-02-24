@@ -14,115 +14,117 @@
       <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.1/css/all.css" integrity="sha384-vp86vTRFVJgpjF9jiIGPEEqYqlDwgyBgEF109VFjmqGmIY/Y4HV4d3Gp2irVfcrp" crossorigin="anonymous">
   </head>
   <body>
-      <!--[if lt IE 8]>
-          <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
-      <![endif]-->
-      <div class="topbar">
-        <h1 class="logo">
-          <img src="/img/bazam-logo.png"/><a href="#">CriticReads</a>
-        </h1>
-        <button class="button2" onclick='mybooks()'><span> My Books </span></button>
-      </div>
-      <br>
-  
-      
-      <script>
-        function getbooks() {
-          document.getElementById('output').innerHTML = '';
-          let inputValue = document.getElementById('input').value;
-          fetch(`http://openlibrary.org/search.json?q=${inputValue}`)
-            .then((response) => {
-              return response.json();
-            })
-            .then((response) => {
-              for (let i = 0; i < response.docs.length; i++) {
-                if (response.docs[i].cover_i) {
-                  const authorKey = response.docs[i].author_key[0];
-                  fetch(`http://openlibrary.org/authors/${authorKey}.json`)
-                    .then((authorResponse) => {
-                      return authorResponse.json();
-                    })
-                    .then((authorResponse) => {
-                      const authorBio = authorResponse.bio || 'Not available';
-                      document.getElementById('output').innerHTML += `
-                        <div style='display: inline-block; width: 33%; padding: 10px; text-align: center;'>
-                          Title: <h2>${response.docs[i].title}</h2>
-                          Author: ${response.docs[i].author_name[0]}<br>                         
-                          <img src='http://covers.openlibrary.org/b/id/${response.docs[i].cover_i}-M.jpg'><br>
-                          Author Bio: ${authorBio}<br>
-                          Publication Date: ${response.docs[i].first_publish_year}<br>
-                          Genre: ${response.docs[i].subject.slice(0, 5).join(', ')}<br>
-                          Description: ${response.docs[i].description || 'Not available'}<br>
-                          Review: ${response.docs[i].review || 'Not available'}<br>
-                          <div class='rating'>Rate this book:</div>
-                          <br>
-                          <button class='button1' onclick='addBook("${response.docs[i].title}", "${response.docs[i].author_name[0]}", "${authorBio}", "${response.docs[i].first_publish_year}", "${response.docs[i].description || 'Not available'}", "${response.docs[i].review || 'Not available'}", "http://covers.openlibrary.org/b/id/${response.docs[i].cover_i}-M.jpg", "${response.docs[i].subject.slice(0, 5).join(', ')}")' ><span> Add Book </span></button>
-                        </div>`;
-                    });
-                }
+    <!--[if lt IE 8]>
+        <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+    <![endif]-->
+    <div class="topbar">
+      <h1 class="logo">
+        <img src="/img/bazam-logo.png"/><a href="#">CriticReads</a>
+      </h1>
+      <button class="button2" onclick='mybooks()'><span> My Books </span></button>
+    </div>
+    <br>
+
+    
+    <script>
+      function getbooks() {
+        document.getElementById('output').innerHTML = '';
+        let inputValue = document.getElementById('input').value;
+        fetch(`http://openlibrary.org/search.json?q=${inputValue}`)
+          .then((response) => {
+            return response.json();
+          })
+          .then((response) => {
+            for (let i = 0; i < response.docs.length; i++) {
+              if (response.docs[i].cover_i) {
+                const authorKey = response.docs[i].author_key[0];
+                fetch(`http://openlibrary.org/authors/${authorKey}.json`)
+                  .then((authorResponse) => {
+                    return authorResponse.json();
+                  })
+                  .then((authorResponse) => {
+                    const authorBio = authorResponse.bio || 'Not available';
+                    document.getElementById('output').innerHTML += `
+                      <div style='display: inline-block; width: 33%; padding: 10px; text-align: left;'>
+                        <h2>${response.docs[i].title}</h2>
+                        Author: ${response.docs[i].author_name[0]}<br>                         
+                        <img src='http://covers.openlibrary.org/b/id/${response.docs[i].cover_i}-M.jpg' style='height: 300px; width: 200px;'><br>
+                        Author Bio: ${authorBio}<br>
+                        Publication Date: ${response.docs[i].first_publish_year}<br>
+                        Genre: ${response.docs[i].subject.slice(0, 5).join(', ')}<br>
+                        Description: ${response.docs[i].description || 'Not available'}<br>
+                        Review: ${response.docs[i].review || 'Not available'}<br>
+                        <div class='rating'>Rate this book:</div>
+                        <br>
+                        <button class='button1' onclick='addBook("${response.docs[i].title}", "${response.docs[i].author_name[0]}", "${authorBio}", "${response.docs[i].first_publish_year}", "${response.docs[i].description || 'Not available'}", "${response.docs[i].review || 'Not available'}", "http://covers.openlibrary.org/b/id/${response.docs[i].cover_i}-M.jpg", "${response.docs[i].subject.slice(0, 5).join(', ')}")' ><span> Add Book </span></button>
+                        <br>
+                        <br>
+                      </div>`;
+                  });
               }
-            });
-        }
-        
-  
-        function addBook(title, author, bio, publication_date, description, reviews, cover_image, genre) {
-          fetch('/homepage', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              title: title,
-              author: author,
-              bio: bio,
-              publication_date: publication_date,
-              description: description,
-              reviews: reviews,
-              cover_image: cover_image,
-              genre: genre
-            })
-          })
-          .then(response => {
-            if (response.ok) {
-              console.log('Book added successfully!');
-              window.location.href = '/mybooks';
-            } else {
-              console.log('Error adding book:', response.statusText);
             }
-          })
-          .catch(error => {
-            console.log('Error adding book:', error);
           });
-        }
-        
-
-      
-        function mybooks(res, req){
-          window.location.href = "/mybooks";
-        }
-      </script>
-      
+      }
       
 
+      function addBook(title, author, bio, publication_date, description, reviews, cover_image, genre) {
+        fetch('/homepage', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            title: title,
+            author: author,
+            bio: bio,
+            publication_date: publication_date,
+            description: description,
+            reviews: reviews,
+            cover_image: cover_image,
+            genre: genre
+          })
+        })
+        .then(response => {
+          if (response.ok) {
+            console.log('Book added successfully!');
+            window.location.href = '/mybooks';
+          } else {
+            console.log('Error adding book:', response.statusText);
+          }
+        })
+        .catch(error => {
+          console.log('Error adding book:', error);
+        });
+      }
+      
 
-      <div class="home-spacer">
-        <h1 class="page-title">Identify a book in an instant</h1>
-        <br>
-        <input id="input" name="query" type="text" autofocus placeholder="Search for a quote, text, or keywords">
-        <button class="button" onclick="getbooks()"> Get Books </button>
-        <br>
-        <br>
-        <br>
-        <div id="output"></div>
+    
+      function mybooks(res, req){
+        window.location.href = "/mybooks";
+      }
+    </script>
+    
+    
 
-      </div>
-  
-      <div class="bookmatch">
-      </div>
-  
-      <footer>
-        
-      </footer>
+
+    <div class="home-spacer">
+      <h1 class="page-title">Identify a book in an instant</h1>
+      <br>
+      <input id="input" name="query" type="text" autofocus placeholder="Search for a quote, text, or keywords">
+      <button class="button" onclick="getbooks()"> Get Books </button>
+      <br>
+      <br>
+      <br>
+      <div id="output"></div>
+
+    </div>
+
+    <div class="bookmatch">
+    </div>
+
+    <footer>
+      
+    </footer>
     
   </body>
 </html>

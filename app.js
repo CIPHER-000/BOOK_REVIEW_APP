@@ -60,9 +60,57 @@ app.get('/homepage', function(req, res) {
     res.sendFile(__dirname + '/views/templates/homepage.html');
 });
 
+
 app.get('/mybooks', function(req, res) {
-    res.sendFile(__dirname + '/views/templates/books.html');
+    let sql = "SELECT * FROM book";
+    con.query(sql, function(err, result) {
+        if (err) throw err;
+        let booksHTML = "";
+        booksHTML += `
+        <style>
+            body {
+                width: 100%;
+                margin: 0;
+                padding: 0;
+            }
+        </style>
+        <div style='position: fixed; top: 0; width: 100%; z-index: 1; background-color: black; padding: 10px;'>
+            <h1 style='text-align: center; color: white; margin: 0; font-size: 1.5em; text-decoration: none; letter-spacing: 1px; font-family: "Slackey", cursive;'>My Books</h1>
+        </div>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        `
+        for (let i = 0; i < result.length; i++) {
+            const book = result[i];
+            let imgSql = "SELECT cover_image FROM book WHERE id = ?";
+            con.query(imgSql, [book.id], function(err, imgResult) {
+                if (err) throw err;
+                let imgData = imgResult[0].cover_image;
+                booksHTML += `
+                <div style='display: inline-block; width: 23%; padding: 30px; text-align: left; margin-right: -38px; margin-bottom: 10px;'>
+                    <h2>${book.title}</h2>
+                    <p>Author: ${book.author}</p>
+                    <img src="${imgData}" alt="${book.title}" style='width: 53%; height: 36%;'>
+                    <p>Author Bio: ${book.author_bio || 'Not available'}</p>
+                    <p>Publication Date: ${book.publication_date}</p>
+                    <p>Genre: ${book.genre}</p>
+                    <p>Description: ${book.description || 'Not available'}</p>
+                    <p>Review: ${book.review || 'Not available'}</p>
+                    <hr>
+                </div>
+            `;
+
+                if (i === result.length - 1) {
+                    res.send(booksHTML);
+                }
+            });
+        }
+    });
 });
+
 
 
 app.get('/apology', function(req, res) {
@@ -246,6 +294,11 @@ app.listen(8000, () => {
 //The app connects to a MySQL database with the connection details host: 'localhost', user: 'root', password: 'root_toor', database: 'review book'.
 
 //The authentication is done using passport and the LocalStrategy strategy.The user inputs are checked against the stored user information in the database.The password is hashed using bcrypt.
+
+//The code serves HTML pages and CSS files to the client.The user can either log in or sign up by submitting a form in the '/'
+//endpoint.If the authentication is successful, the user is redirected to the homepage, otherwise the user is redirected back to the login page with a failure flash message.
+
+//When a user signs up, the form inputs are inserted into the MySQL database using an SQL query.The password is hashed and stored in the database.database.The password is hashed using bcrypt.
 
 //The code serves HTML pages and CSS files to the client.The user can either log in or sign up by submitting a form in the '/'
 //endpoint.If the authentication is successful, the user is redirected to the homepage, otherwise the user is redirected back to the login page with a failure flash message.
